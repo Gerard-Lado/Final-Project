@@ -25,12 +25,19 @@ class DictTest(App):
                         )
         self.window.add_widget(self.greeting)
 
-        self.results = Label(
+        self.results1 = Label(
                         text= "",
                         font_size= 18,
                         color= '#00FFCE'
                         )
-        self.window.add_widget(self.results)
+        self.window.add_widget(self.results1)
+
+        self.results2 = Label(
+                        text= "",
+                        font_size= 18,
+                        color= '#00FFCE'
+                        )
+        self.window.add_widget(self.results2)
 
         # text input widget
         self.user = TextInput(
@@ -60,7 +67,8 @@ class DictTest(App):
         store = JsonStore('filo_dict.json')
         if store.exists((self.user.text).lower()):
             self.greeting.text = "The word" + " " + self.user.text + " " + "exists."
-            self.results.text = ""
+            self.karesults.text = ""
+            self.vasaresults.text = ""
         else:
             #Suggested Words
             searched_word = (self.user.text).lower()
@@ -76,8 +84,10 @@ class DictTest(App):
 
             print(tested_word_letters)
             print(searched_word_letters)
-            suggested_words = []
+            ka_suggested_words = []
+            va_sa_suggested_words = []
 
+            #Accounts for misclicks, hasty and careless typing, or disproportionately large-handed people with disproportionately tiny keyboards
             keyboard_approximate = {
                 "a": "qwesxz",
                 "b": "vghn",
@@ -107,6 +117,7 @@ class DictTest(App):
                 "z": "asx"
             }
 
+            #In case people get vowels mixed up
             vowel_approximate = {
                 "a": "eiou",
                 "e": "aiou",
@@ -114,6 +125,19 @@ class DictTest(App):
                 "o": "aeiu",
                 "u": "aeio"
             }
+
+            sound_approximate = {
+                "q": "kc",
+                "w": "uo",
+                "i": "ye",
+                "c": "kq",
+                "k": "qc",
+                "u": "w",
+                "y": "ie",
+                "e": "yi",
+                "o": "wu"
+            }
+                
 
             for a in range(len(searched_word_letters)):
 
@@ -127,7 +151,7 @@ class DictTest(App):
                             for i in tested_word_letters:
                                 tested_word = tested_word + i
                             if store.exists(tested_word):
-                                suggested_words.append(tested_word)
+                                ka_suggested_words.append(tested_word)
                             else:
                                 pass
             #------------------------------------------------------------------------
@@ -136,30 +160,73 @@ class DictTest(App):
             #----------- Checking for mispells due to mixing vowels around ----------             
                 for y, z in vowel_approximate.items():
                     if tested_word_letters[a] == y:
-                        print("detected")
                         for approx_vowel in z:
                             tested_word_letters = searched_word_letters.copy()
                             tested_word_letters[a] = approx_vowel
                             tested_word = ""
                             for h in tested_word_letters:
                                 tested_word = tested_word + h
-                            print(tested_word)
                             if store.exists(tested_word):
-                                suggested_words.append(tested_word)
+                                va_sa_suggested_words.append(tested_word)
+                            else:
+                                pass
+            #------------------------------------------------------------------------
+                            
+                tested_word_letters = searched_word_letters.copy() #Reset tested list to original
+                
+            #------------------------------------------------------------------------
+
+            #----------- Checking for mispells due to similar sounds ----------------
+                for j, p in sound_approximate.items():
+                    if tested_word_letters[a] == j:
+                        for homonym in p:
+                            tested_word_letters = searched_word_letters.copy()
+                            tested_word_letters[a] = homonym
+                            tested_word = ""
+                            for h in tested_word_letters:
+                                tested_word = tested_word + h
+                            if store.exists(tested_word):
+                                va_sa_suggested_words.append(tested_word)
                             else:
                                 pass
             #------------------------------------------------------------------------
                 tested_word_letters = searched_word_letters.copy() #Reset tested list to original
 
-            suggested_words = list(set(suggested_words))
+
+            ka_suggested_words = list(set(ka_suggested_words))
+            va_sa_suggested_words = list(set(va_sa_suggested_words))
+
+            
+            
             self.greeting.text = "The word " + self.user.text + " does not exist."
-            if len(suggested_words) > 0:
-                suggestion_text = "Perhaps you meant to type these?: "
-                for i in range(len(suggested_words)):
-                    suggestion_text += f"({i}) {suggested_words[i]} "
-                self.results.text = suggestion_text
+            if len(ka_suggested_words) > 0 and len(va_sa_suggested_words) > 0:
+                ka_suggestion_text = "Perhaps you meant to type these?: "
+                for i in range(len(ka_suggested_words)):
+                    ka_suggestion_text += f"({i}) {ka_suggested_words[i]} "
+                self.results1.text = ka_suggestion_text
+                va_sa_suggestion_text = "Or maybe you misheard (? idk if this is the best word) these: "
+                for r in range(len(va_sa_suggested_words)):
+                    va_sa_suggestion_text += f"({r}) {va_sa_suggested_words[r]}"
+                self.results2.text = va_sa_suggestion_text
+                
+            elif len(ka_suggested_words) == 0 and len(va_sa_suggested_words) == 0:
+                self.results1.text = "No suggestions available"
+                self.results2.text = ""
+
+            elif len(ka_suggested_words) > 0 and len(va_sa_suggested_words) == 0:
+                ka_suggestion_text = "Perhaps you meant to type these?: "
+                for i in range(len(ka_suggested_words)):
+                    ka_suggestion_text += f"({i}) {ka_suggested_words[i]} "
+                self.results1.text = ka_suggestion_text
+                self.results2.text = ""
             else:
-                self.results.text = "No suggestions available"
+                va_sa_suggestion_text = "Or maybe you misheard (? idk if this is the best word) these: "
+                for r in range(len(va_sa_suggested_words)):
+                    va_sa_suggestion_text += f"({r}) {va_sa_suggested_words[r]}"
+                self.results1.text = va_sa_suggestion_text
+                self.results2.text = ""
+
+                
             
     
 
