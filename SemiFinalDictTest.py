@@ -25,6 +25,13 @@ class DictTest(App):
                         )
         self.window.add_widget(self.greeting)
 
+        self.results = Label(
+                        text= "",
+                        font_size= 18,
+                        color= '#00FFCE'
+                        )
+        self.window.add_widget(self.results)
+
         # text input widget
         self.user = TextInput(
                     multiline= False,
@@ -53,6 +60,7 @@ class DictTest(App):
         store = JsonStore('filo_dict.json')
         if store.exists((self.user.text).lower()):
             self.greeting.text = "The word" + " " + self.user.text + " " + "exists."
+            self.results.text = ""
         else:
             #Suggested Words
             searched_word = (self.user.text).lower()
@@ -145,7 +153,13 @@ class DictTest(App):
 
             suggested_words = list(set(suggested_words))
             self.greeting.text = "The word " + self.user.text + " does not exist."
-            print(f"Perhaps you meant to type {suggested_words}")
+            if len(suggested_words) > 0:
+                suggestion_text = "Perhaps you meant to type these?: "
+                for i in range(len(suggested_words)):
+                    suggestion_text += f"({i}) {suggested_words[i]} "
+                self.results.text = suggestion_text
+            else:
+                self.results.text = "No suggestions available"
             
     
 
